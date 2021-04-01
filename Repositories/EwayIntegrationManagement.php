@@ -164,16 +164,20 @@ class EwayIntegrationManagement extends ServiceAbstract
     protected function transactionResult($response)
     {
         if (isset($response->TransactionStatus) && $response->TransactionStatus) {
+            $response = $response->toArray();
             $items = [];
-            if (isset($response->TransactionType)) {
-                $item['TransactionType'] = $response->TransactionType;
+            if (isset($response['TransactionType'])) {
+                $item['TransactionType'] = $response['TransactionType'];
             } else {
                 $item['TransactionType'] = 'Refund';
             }
-            $item['TransactionID']     = $response->TransactionID;
-            $item['TransactionStatus'] = $response->TransactionStatus;
-            $item['ResponseCode']      = $response->ResponseCode;
-            $item['ResponseMessage']   = Rapid::getMessage($response->ResponseMessage);
+            $item['TransactionID']     = $response['TransactionID'];
+            $item['TransactionStatus'] = $response['TransactionStatus'];
+            $item['ResponseCode']      = $response['ResponseCode'];
+            $item['ResponseMessage']   = Rapid::getMessage($response['ResponseMessage']);
+            if (isset($response['Customer']) && isset($response['Customer']['CardDetails'])) {
+                $item['CardNumber']       = $response['Customer']['CardDetails']['Number'];
+            }
             $items[]                   = $item;
 
             return $this->getSearchResult()
